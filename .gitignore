@@ -1,24 +1,22 @@
-# Java & Maven
-target/
+# Java & Maven (Backend)
+backend/target/
 *.class
 *.jar
 *.war
 
-# IDE files
+# Node & React (Frontend)
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+.next/
+
+# IDE & OS Files
 .idea/
 *.iml
 .classpath
 .project
 .settings/
 .vscode/
-
-# Environment / OS
 .DS_Store
 Thumbs.db
 *.log
-
-# Frontend (Node modules / build output)
-node_modules/
-dist/
-build/
-.next/
