@@ -1,75 +1,80 @@
 import { useEffect, useState } from 'react';
-import { getAlbums, getTracks } from './api';
+import './App.css';
+import {
+  getAlbums,
+  createAlbum,
+  deleteAlbum,
+  getTracks,
+  createTrack,
+  deleteTrack,
+} from './api';
+import AlbumSection from './components/AlbumSection';
+import TrackSection from './components/TrackSection';
 
 function App() {
   const [albums, setAlbums] = useState([]);
   const [tracks, setTracks] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+
+  const refreshData = async () => {
+    try {
+      setLoading(true);
+      const [albumsRes, tracksRes] = await Promise.all([getAlbums(), getTracks()]);
+      setAlbums(albumsRes.data);
+      setTracks(tracksRes.data);
+    } catch (err) {
+      console.error('Failed to sync data with backend:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const [albumsRes, tracksRes] = await Promise.all([
-          getAlbums(),
-          getTracks()
-        ]);
-        setAlbums(albumsRes.data);
-        setTracks(tracksRes.data);
-        setError(null);
-      } catch (err) {
-        console.error('Error connecting to backend:', err);
-        setError('Failed to load data from backend. Ensure Spring Boot is running on port 8080.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
+    refreshData();
   }, []);
 
+  const handleCreateAlbum = async (albumData) => {
+    await createAlbum(albumData);
+    await refreshData();
+  };
+
+  const handleDeleteAlbum = async (id) => {
+    await deleteAlbum(id);
+    await refreshData();
+  };
+
+  const handleCreateTrack = async (trackData) => {
+    await createTrack(trackData);
+    await refreshData();
+  };
+
+  const handleDeleteTrack = async (id) => {
+    await deleteTrack(id);
+    await refreshData();
+  };
+
   return (
-    <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
-      <h1>🎵 NaadaGangaa Music Dashboard</h1>
-      <hr />
+    <div className="container">
+      <header className="header">
+        <h1>🎶 NaadaGangaa Music Portal</h1>
+      </header>
 
-      {loading && <p>Connecting to backend API...</p>}
-
-      {error && (
-        <div style={{ color: 'red', padding: '1rem', border: '1px solid red', borderRadius: '4px' }}>
-          {error}
-        </div>
-      )}
-
-      {!loading && !error && (
-        <div>
-          <h2>Albums ({albums.length})</h2>
-          {albums.length === 0 ? (
-            <p>No albums found in database.</p>
-          ) : (
-            <ul>
-              {albums.map((album) => (
-                <li key={album.id}>
-                  <strong>{album.title}</strong> by {album.artist} ({album.releaseYear})
-                </li>
-              ))}
-            </ul>
-          )}
-
-          <h2>Tracks ({tracks.length})</h2>
-          {tracks.length === 0 ? (
-            <p>No tracks found in database.</p>
-          ) : (
-            <ul>
-              {tracks.map((track) => (
-                <li key={track.id}>
-                  <strong>{track.name}</strong> - {track.genre} ({track.durationSeconds}s)
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+      {loading ? (
+        <p>Loading catalog...</p>
+      ) : (
+        <main className="grid">
+          <AlbumSection
+            albums={albums}
+            onCreateAlbum={handleCreateAlbum}
+            onDeleteAlbum={handleDeleteAlbum}
+          />
+          <TrackSection
+            tracks={tracks}
+            albums={albums}
+            onCreateTrack={handleCreateTrack}
+            onDeleteTrack={handleDeleteTrack}
+          />
+        </main>
       )}
     </div>
   );
