@@ -47,93 +47,79 @@ flowchart TD
 
 ### 1. File Upload Execution Flow (MP3 / Thumbnails)
 ```mermaid
-[ Client / Admin ]
-|
-| 1. POST /api/songs/upload (Multipart: Audio File + Metadata)
-v
-[ SongController ]
-|
-| 2. Save binary file to local filesystem (/uploads/songs/)
-v
-[ Local File System ]
-|
-| 3. Construct relative media path (e.g., "/uploads/songs/song_123.mp3")
-v
-[ Song Entity & Repository ]
-|
-| 4. Persist metadata & relative file path in Relational DB
-v
-[ Database (H2/MySQL) ]
-|
-| 5. Return success JSON with song ID & playback URL
-v
-[ Client Response ]
-```
+sequenceDiagram
+    autonumber
+    actor Client as Client / Admin
+    participant Controller as SongController
+    participant FS as Local File System
+    participant JPA as Song Entity & Repo
+    participant DB as Database (H2/MySQL)
 
+    Client->>Controller: POST /api/songs/upload<br/>(Multipart: Audio + Metadata)
+    Controller->>FS: Save binary file<br/>to /uploads/songs/
+    Note over Controller: Construct relative path<br/>(e.g., "/uploads/songs/song_123.mp3")
+    Controller->>JPA: Pass entity metadata & file path
+    JPA->>DB: Persist metadata & path
+    DB-->>Client: Return success JSON<br/>(Song ID & Playback URL)
+```
 ---
 
 ### 2. Audio Streaming & Media Serving Flow
 ```mermaid
-[ Client Browser ]
-|
-| 1. Requests GET /uploads/songs/song_123.mp3
-v
-[ WebConfig (ResourceHandler) ]
-|
-| 2. Map "/uploads/" path to local disk "file:uploads/"
-v
-[ Local File System ]
-|
-| 3. Stream audio bytes directly to client HTML5 audio player
-v
-[ HTML5 Audio Player ]
-```
+sequenceDiagram
+    autonumber
+    actor Client as Client Browser
+    participant WebConfig as WebConfig (ResourceHandler)
+    participant FS as Local File System
+    participant Player as HTML5 Audio Player
 
+    Client->>WebConfig: Requests GET /uploads/songs/song_123.mp3
+    Note over WebConfig: Map "/uploads/" path<br/>to local disk "file:uploads/"
+    WebConfig->>FS: Fetch file payload
+    FS-->>Player: Stream audio bytes directly<br/>to client HTML5 audio player
+```
 ---
 
 ### 3. Client Navigation Route Forwarding Flow
 ```mermaid
-[ Client Browser (Page Refresh on /albums or /admin) ]
-|
-| 1. HTTP GET /albums
-v
-[ WebController ]
-|
-| 2. Intercept non-API, non-static GET routes
-v
-[ Route Forwarding ]
-|
-| 3. Forward to "forward:/index.html"
-v
-[ React Router (SPA) ]
-|
-| 4. React Router parses window URL and renders target page
-v
-[ Rendered UI ]
-```
+sequenceDiagram
+    autonumber
+    actor Client as Client Browser<br/>(Page Refresh on /albums or /admin)
+    participant WebCtrl as WebController (Spring Boot)
+    participant Fwd as Route Forwarding
+    participant React as React Router (SPA)
+    participant UI as Rendered UI
 
+    Client->>WebCtrl: HTTP GET /albums
+    WebCtrl->>Fwd: Intercept non-API, non-static GET routes
+    Fwd->>React: Forward to "forward:/index.html"
+    Note over React: React Router parses window URL<br/>and handles internal routing
+    React->>UI: Render targeted component view
+```
 ---
 
-## 🗄 Database Schema Relationships
-```mermaid
-+--------------------+        1 : N        +--------------------+
+## Database Schema Relationships
+Unable to render rich display
+
+No diagram type detected matching given configuration for text: +--------------------+ 1 : N +--------------------+
 | User | ------------------< | Song |
 | ---- ||--------------------|
-| id (PK)            |                     | id (PK)            |
-| username           |                     | title              |
-| email              |                     | duration           |
-| password           |                     | file               |
-+--------------------+                     | album_id (FK)      |
+| id (PK) | | id (PK) |
+| username | | title |
+| email | | duration |
+| password | | file |
++--------------------+ | album_id (FK) |
 +--------------------+
 |
-+--------------------+                               |
++--------------------+ |
 | Album     | ------------------------------+ (Optional N:1) |
 | --------- |
 | id (PK)   |
 | title     |
 | thumbnail |
 +--------------------+
-```
+
+
 
 ---
 
