@@ -9,40 +9,37 @@ The backend service for **NaadaGangaa**—a Java 21 & Spring Boot 3 REST API pro
 The application follows a layered **MVC Architecture** with Spring Data JPA for persistence and Spring Web for RESTful endpoints and static asset serving.
 
 ```mermaid
-+-----------------------------------------------------------------------+
-|                             React Frontend                            |
-|                     (Songs, Albums, Admin, Auth UI)                   |
-+-----------------------------------------------------------------------+
-|
-**HTTP** / **REST** **API**
-v
-+-----------------------------------------------------------------------+
-|                            Spring Boot API                            |
-|                                                                       |
-|  +-------------------+  +---------------------+  +-----------------+  |
-|  |  AuthController   |  |   SongController    |  | AlbumController |  |
-|  +-------------------+  +---------------------+  +-----------------+  |
-|            |                       |                      |           |
-|            +-----------------------+----------------------+           |
-|                                    v                                  |
-|                         +---------------------+                       |
-|                         |  JPA Repositories   |                       |
-|                         +---------------------+                       |
-+-----------------------------------------------------------------------+
-|
-**JDBC**
-v
-+-----------------------------------------------------------------------+
-|                          H2 / MySQL Database                          |
-|             (User, Song, Album, Artist Relational Tables)             |
-+-----------------------------------------------------------------------+
-|
-### Local Static Media Storage
-v
-+-----------------------------------------------------------------------+
-|                            uploads/ Directory                         |
-|                    (/uploads/songs/, /uploads/albums/)                |
-+-----------------------------------------------------------------------+
+flowchart TD
+    %% Frontend Tier
+    subgraph Frontend [Presentation Layer]
+        React[React Frontend<br/>Songs, Albums, Admin, Auth UI]
+    end
+
+    %% Backend Tier
+    subgraph Backend [Application Layer: Spring Boot API]
+        direction TB
+        subgraph Controllers [REST Controllers]
+            AuthCtrl[Auth XML/Controller]
+            SongCtrl[Song Controller]
+            AlbumCtrl[Album Controller]
+        end
+        JPA[JPA Repositories]
+        Controllers --> JPA
+    end
+
+    %% Data Tiers
+    subgraph DatabaseTier [Storage Layer: Relational]
+        DB[(H2 / MySQL Database<br/>User, Song, Album, Artist Tables)]
+    end
+
+    subgraph StorageTier [Storage Layer: File System]
+        UploadsDir["uploads/ Directory<br/>(/uploads/songs/, /uploads/albums/)"]
+    end
+
+    %% Communication Interfaces
+    React -->|HTTP / REST API| Controllers
+    JPA -->|JDBC Connection| DB
+    DB -.->|Local Static Media Mapping| UploadsDir
 ```
 ---
 
