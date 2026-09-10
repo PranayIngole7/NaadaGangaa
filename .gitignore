@@ -1,27 +1,30 @@
-# Java & Maven (Backend)
-backend/target/
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# IDEs
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Spring Boot / Java
 target/
 .mvn/
 *.class
 *.jar
 *.war
-node_modules/
-dist/
-.DS_Store
 
-# Node & React (Frontend)
-frontend/node_modules/
-frontend/dist/
-frontend/build/
-.next/
+# Database / Storage
+*.db
+*.sqlite
 
-# IDE & OS Files
-.idea/
-*.iml
-.classpath
-.project
-.settings/
-.vscode/
-.DS_Store
-Thumbs.db
-*.log
+# Application Uploads
+/backend/uploads/
