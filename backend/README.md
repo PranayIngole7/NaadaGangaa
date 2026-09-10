@@ -99,27 +99,33 @@ sequenceDiagram
 ---
 
 ## Database Schema Relationships
-Unable to render rich display
+```mermaid
+erDiagram
+    USER {
+        int id PK
+        string username
+        string email
+        string password
+    }
 
-No diagram type detected matching given configuration for text: +--------------------+ 1 : N +--------------------+
-| User | ------------------< | Song |
-| ---- ||--------------------|
-| id (PK) | | id (PK) |
-| username | | title |
-| email | | duration |
-| password | | file |
-+--------------------+ | album_id (FK) |
-+--------------------+
-|
-+--------------------+ |
-| Album     | ------------------------------+ (Optional N:1) |
-| --------- |
-| id (PK)   |
-| title     |
-| thumbnail |
-+--------------------+
+    SONG {
+        int id PK
+        string title
+        int duration
+        string file
+        int album_id FK
+        int user_id FK
+    }
 
+    ALBUM {
+        int id PK
+        string title
+        string thumbnail
+    }
 
-
+    %% Relationships
+    USER ||--o{ SONG : "creates / owns"
+    ALBUM o{--|{ SONG : "contains"
+```
 ---
 
