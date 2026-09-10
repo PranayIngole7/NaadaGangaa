@@ -1,8 +1,7 @@
 package com.naadagangaa.controller;
 
-import com.naadagangaa.model.AlbumDto;
-import com.naadagangaa.service.AlbumService;
-import org.springframework.http.HttpStatus;
+import com.naadagangaa.entity.Album;
+import com.naadagangaa.repository.AlbumRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,32 +9,38 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/albums")
+@CrossOrigin(origins = "http://localhost:5173")
 public class AlbumController {
 
-    private final AlbumService albumService;
+    private final AlbumRepository albumRepository;
 
-    public AlbumController(AlbumService albumService) {
-        this.albumService = albumService;
+    public AlbumController(AlbumRepository albumRepository) {
+        this.albumRepository = albumRepository;
     }
 
     @GetMapping
-    public ResponseEntity<List<AlbumDto>> getAllAlbums() {
-        return ResponseEntity.ok(albumService.getAllAlbums());
+    public List<Album> getAllAlbums() {
+        return albumRepository.findAll();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<AlbumDto> getAlbumById(@PathVariable Long id) {
-        return ResponseEntity.ok(albumService.getAlbumById(id));
+    public ResponseEntity<Album> getAlbumById(@PathVariable Long id) {
+        return albumRepository.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ResponseEntity<AlbumDto> createAlbum(@RequestBody AlbumDto albumDto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(albumService.createAlbum(albumDto));
+    public Album createAlbum(@RequestBody Album album) {
+        return albumRepository.save(album);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteAlbum(@PathVariable Long id) {
-        albumService.deleteAlbum(id);
+        if (!albumRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        albumRepository.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 }

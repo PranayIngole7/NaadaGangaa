@@ -1,6 +1,6 @@
 package com.naadagangaa.repository;
 
-import com.naadagangaa.model.Album;
+import com.naadagangaa.entity.Album;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

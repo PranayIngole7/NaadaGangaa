@@ -1,12 +1,11 @@
 package com.naadagangaa.repository;
 
-import com.naadagangaa.model.Track;
+import com.naadagangaa.entity.Artist;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-
 import java.util.List;
 
 @Repository
-public interface TrackRepository extends JpaRepository<Track, Long> {
-    List<Track> findByAlbumId(Long albumId);
+public interface ArtistRepository extends JpaRepository<Artist, Long> {
+    List<Artist> findByLastNameContainingIgnoreCase(String lastName);
 }
